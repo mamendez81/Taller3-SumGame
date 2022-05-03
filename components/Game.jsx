@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Button } from "react-native";
 import React, {useEffect, useState, useRef} from "react";
 import Number from "./Number";
 
@@ -9,7 +9,9 @@ export default Game = ({randomNumbersCount, initialSeconds}) => {
     const [selectedNumbers, setSelectedNumbers]=useState([]);
     const [remainingSeconds, setRemainingSeconds] = useState(initialSeconds);
     const [gameStatus, setGameStatus] = useState('PLAYING');
-
+    const [reinicio, setReinicio] = useState([]);
+    const [activarbutton, setActivarbutton] = useState(true);
+    
     let intervalId = useRef();
     useEffect(()=>console.log(selectedNumbers), [selectedNumbers]);
 
@@ -27,20 +29,25 @@ export default Game = ({randomNumbersCount, initialSeconds}) => {
         
         setRandomNumbers(numbers);
         setTarget(target);
+        
+        setRemainingSeconds(initialSeconds);
         intervalId.current = setInterval(() => setRemainingSeconds(seconds=>seconds-1), 1000);
         return () => clearInterval(intervalId.current);
-    }, []);
+        
+    }, [reinicio]);
 
-   
+    
     useEffect(() => {
         setGameStatus(() => getGameStatus());
         if (remainingSeconds === 0 || gameStatus !== 'PLAYING') {
-            clearInterval(intervalId.current);
+            setActivarbutton(false);
+         } else {
+            setActivarbutton(true);
          }
-    }, [remainingSeconds, selectedNumbers]);
-
+    }, [remainingSeconds, selectedNumbers, gameStatus]);
+    
     const isNumberSelected=numberIndex=>selectedNumbers.some(number=>number===numberIndex);
-    const selectNumber = number =>{ 
+    const selectNumber = number =>{
         setSelectedNumbers([...selectedNumbers, number])};
 
     const getGameStatus = () => {
@@ -56,12 +63,13 @@ export default Game = ({randomNumbersCount, initialSeconds}) => {
         }
     };
     // const status = gameStatus();
-    
     return (
         <View>
             <Text style={styles.target}>{target}</Text>
             <Text style={[styles.target, styles[gameStatus]]}>{gameStatus}</Text>
-            <Text>{remainingSeconds}</Text>
+            <Text style={[styles.target, styles[gameStatus]]}>{remainingSeconds}</Text>
+            
+            
             <View style={styles.randomContainer}>
                 {randomNumbers.map((number, index)=>(
                     <Number key={index} 
@@ -70,11 +78,24 @@ export default Game = ({randomNumbersCount, initialSeconds}) => {
                     isSelected={isNumberSelected(index) || gameStatus !== 'PLAYING'} 
                     onSelected={selectNumber}/>
                 ))}
+                 
             </View>
             
+            <View style={styles.button}>
+                <Button  
+                    title="Play Again"
+                    disabled={activarbutton}
+                    onPress={() => (
+                        setSelectedNumbers([]),
+                        setReinicio([])
+                    )}
+                />
+            </View>
+                
+                
         </View>
+        
     );
-    
 };
 
 const styles = StyleSheet.create({
@@ -84,7 +105,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     randomContainer: {
-        flex: 1,
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
@@ -97,5 +117,16 @@ const styles = StyleSheet.create({
     },
     WON: {
         backgroundColor: 'green'
+    },
+    button: {
+        backgroundColor: 'grey',
+        fontSize: 40,
+        textAlign: 'center',
+        shadowOpacity: 1
+    },
+    remainingSeconds: {
+        backgroundColor: 'grey',
+        fontSize: 40,
+        textAlign: 'center',
     },
 });
