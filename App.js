@@ -6,7 +6,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       
-      <Game randomNumbersCount={6} initialSeconds={10}/>
+      <Game randomNumbersCount={6} initialSeconds={30}/>
       <StatusBar style="auto" />
       
     </View>
